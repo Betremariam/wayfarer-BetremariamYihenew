@@ -6,10 +6,8 @@ export function errorHandler(
   err: any,
   req: Request,
   res: Response,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   next: NextFunction
 ) {
-  // Handle custom application errors
   if (err instanceof AppError) {
     return res.status(err.statusCode).json({
       error: err.message,
@@ -18,7 +16,6 @@ export function errorHandler(
     });
   }
 
-  // Handle Zod validation errors (checking both instanceof and name/issues for robust monorepo support)
   if (err instanceof ZodError || err?.name === "ZodError" || Array.isArray(err?.issues)) {
     const issues = err.issues || err.errors || [];
     return res.status(400).json({
@@ -31,7 +28,6 @@ export function errorHandler(
     });
   }
 
-  // Generic/Database errors: never leak raw DB errors or sensitive internals to the client
   console.error("[Unhandled Error]:", err);
 
   return res.status(500).json({

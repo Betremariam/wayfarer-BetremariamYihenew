@@ -11,3 +11,4 @@ app.listen(PORT, () => {
   console.log(`[Wayfarer API] Health check at http://localhost:${PORT}/health`);
   console.log(`[Wayfarer API] REST API base at http://localhost:${PORT}/api`);
 });
+

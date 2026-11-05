@@ -71,3 +71,4 @@ if (err instanceof ZodError || err?.name === "ZodError" || Array.isArray(err?.is
 }
 ```
 This ensured 100% reliable 400 validation responses across all endpoints regardless of package boundary resolution.
+

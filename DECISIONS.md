@@ -116,3 +116,4 @@ The architecture was verified with an automated integration test against real Po
 2. **Idempotency Keys:** While `(placeId, userId)` is unique for reviews, repeated identical booking requests from a double-clicking client could result in two bookings if seats are available.
    - *Future improvement:* Add an `Idempotency-Key` header with a Redis/DB-backed cache of recent submission tokens.
 3. **Read Replicas & Caching:** Calculating global mean $C$ and Bayesian scores on every request scales well for catalog sizes under 100,000 destinations, but for millions of destinations, $C$ should be cached in Redis with a 5-minute TTL, or Bayesian scores updated asynchronously via materialized views or event-driven review worker queues.
+

@@ -205,3 +205,4 @@ NEXT_PUBLIC_API_URL="http://localhost:5000/api"
 - **High-Contention Locks:** For extreme ticket drops (>5,000 requests/sec), an in-memory Redis atomic counter (`DECRBY`) can reserve seats ahead of database serialization.
 - **Idempotency Keys:** Adding an `Idempotency-Key` header prevents duplicate client-side double clicks.
 - **Materialized Views:** For datasets exceeding 100,000 destinations, caching the global prior $C$ or computing Bayesian scores asynchronously via background workers will optimize read throughput.
+

@@ -27,16 +27,6 @@ export interface BookingResult {
 export class BookingService {
   constructor(private prisma: PrismaClient) {}
 
-  /**
-   * Concurrency-safe seat reservation.
-   *
-   * Utilizes a PostgreSQL interactive transaction with explicit row-level locking:
-   * `SELECT ... FOR UPDATE` on the target TourSlot.
-   *
-   * This guarantees that concurrent booking attempts for the same tour slot
-   * are strictly serialized at the database row level, preventing race conditions
-   * and double-allocation of seats.
-   */
   async bookSeats(
     slotId: string,
     userId: string,
@@ -60,7 +50,6 @@ export class BookingService {
 
     return await this.prisma.$transaction(
       async (tx) => {
-        // Step 1: Validate active user
         const user = await tx.user.findUnique({
           where: { id: userId },
         });
@@ -69,10 +58,6 @@ export class BookingService {
           throw new UnauthorizedUserError(`User with ID '${userId}' does not exist.`);
         }
 
-        // Step 2: Acquire an exclusive row lock on the target TourSlot using parameterized raw SQL.
-        // `SELECT ... FOR UPDATE` acquires an exclusive row-level lock in PostgreSQL.
-        // Any other concurrent transaction trying to lock or update this row will block
-        // until this transaction commits or rolls back.
         const lockedSlots = await tx.$queryRaw<
           Array<{ id: string; capacity: number; placeId: string; startsAt: Date }>
         >`
@@ -88,7 +73,6 @@ export class BookingService {
 
         const slot = lockedSlots[0];
 
-        // Step 3: Compute current total booked seats under the held lock
         const bookingsAggregate = await tx.booking.aggregate({
           where: { slotId },
           _sum: { seats: true },
@@ -97,7 +81,6 @@ export class BookingService {
         const bookedSeats = bookingsAggregate._sum.seats ?? 0;
         const remainingSeats = slot.capacity - bookedSeats;
 
-        // Step 4: Validate capacity constraints
         if (remainingSeats <= 0) {
           throw new SlotFullyBookedError(
             `This tour slot is fully booked. There are 0 remaining seats available.`
@@ -112,7 +95,6 @@ export class BookingService {
           );
         }
 
-        // Step 5: Insert booking
         const newBooking = await tx.booking.create({
           data: {
             slotId,
@@ -142,9 +124,6 @@ export class BookingService {
     );
   }
 
-  /**
-   * Retrieves all tour slots for a given place with real-time remaining seats.
-   */
   async getSlotsByPlace(placeId: string) {
     if (!placeId || typeof placeId !== "string") {
       throw new ValidationError("Place ID is required");

@@ -6,9 +6,7 @@ import { prisma } from "../db.js";
 const app = createApp();
 
 describe("Places API", () => {
-  beforeAll(async () => {
-    // Database is already seeded or verified
-  });
+  beforeAll(async () => {});
 
   afterAll(async () => {
     await prisma.$disconnect();
@@ -29,7 +27,6 @@ describe("Places API", () => {
     expect(first.ratingStats).toHaveProperty("reviewCount");
     expect(first.ratingStats).toHaveProperty("bayesianScore");
 
-    // By default, places are sorted by Bayesian score descending
     for (let i = 0; i < res.body.length - 1; i++) {
       expect(res.body[i].ratingStats.bayesianScore).toBeGreaterThanOrEqual(
         res.body[i + 1].ratingStats.bayesianScore
@@ -65,15 +62,12 @@ describe("Places API", () => {
     expect(museum).toBeDefined();
     expect(cafe).toBeDefined();
 
-    // The cafe has a 5.0 arithmetic average with only 1 review
     expect(cafe.ratingStats.averageRating).toBe(5.0);
     expect(cafe.ratingStats.reviewCount).toBe(1);
 
-    // The museum has ~4.7 arithmetic average with ~312 reviews
     expect(museum.ratingStats.averageRating).toBeCloseTo(4.7, 1);
     expect(museum.ratingStats.reviewCount).toBeGreaterThanOrEqual(300);
 
-    // Under Bayesian ranking, the established museum OUTRANKS the single-review 5-star cafe!
     expect(museum.ratingStats.bayesianScore).toBeGreaterThan(cafe.ratingStats.bayesianScore);
 
     const museumIdx = res.body.findIndex((p: any) => p.id === museum.id);

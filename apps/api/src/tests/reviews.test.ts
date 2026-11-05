@@ -6,20 +6,17 @@ import { prisma } from "../db.js";
 const app = createApp();
 
 describe("Reviews API", () => {
-  const testUserId = "00000000-0000-0000-0000-000000000001"; // Sara Tadesse
-  const secondUserId = "00000000-0000-0000-0000-000000000002"; // Dawit Kebede
+  const testUserId = "00000000-0000-0000-0000-000000000001";
 
   afterAll(async () => {
     await prisma.$disconnect();
   });
 
   it("POST /api/places/:id/reviews should create a new review", async () => {
-    // Pick Meskel Square
     const placesRes = await request(app).get("/api/places");
     const meskel = placesRes.body.find((p: any) => p.name.includes("Meskel Square"));
     expect(meskel).toBeDefined();
 
-    // Ensure user hasn't reviewed yet for this specific test
     await prisma.review.deleteMany({
       where: { placeId: meskel.id, userId: testUserId },
     });
@@ -43,7 +40,6 @@ describe("Reviews API", () => {
     const placesRes = await request(app).get("/api/places");
     const meskel = placesRes.body.find((p: any) => p.name.includes("Meskel Square"));
 
-    // First submission
     const firstRes = await request(app)
       .post(`/api/places/${meskel.id}/reviews`)
       .set("X-User-Id", testUserId)
@@ -54,7 +50,6 @@ describe("Reviews API", () => {
     expect(firstRes.status).toBe(200);
     const existingReviewId = firstRes.body.id;
 
-    // Second submission by SAME user on SAME place
     const updatedRes = await request(app)
       .post(`/api/places/${meskel.id}/reviews`)
       .set("X-User-Id", testUserId)
@@ -64,18 +59,17 @@ describe("Reviews API", () => {
       });
 
     expect(updatedRes.status).toBe(200);
-    expect(updatedRes.body.id).toBe(existingReviewId); // Same review ID preserved
+    expect(updatedRes.body.id).toBe(existingReviewId);
     expect(updatedRes.body.rating).toBe(5);
     expect(updatedRes.body.body).toContain("Updated version");
 
-    // Check count in database for this (placeId, userId) pair
     const reviewCount = await prisma.review.count({
       where: {
         placeId: meskel.id,
         userId: testUserId,
       },
     });
-    expect(reviewCount).toBe(1); // Enforced 1 review per user per place!
+    expect(reviewCount).toBe(1);
   });
 
   it("PUT /api/places/:id/reviews also updates the review seamlessly", async () => {

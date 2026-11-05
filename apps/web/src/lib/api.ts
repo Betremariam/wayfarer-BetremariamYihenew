@@ -57,12 +57,10 @@ class ApiClient {
     }
   }
 
-  // Users endpoint for switcher
   async getUsers(): Promise<User[]> {
     return this.request<User[]>("/users");
   }
 
-  // Places list with category and sort query
   async getPlaces(params: { category?: string; sort?: string; search?: string } = {}): Promise<PlaceSummary[]> {
     const query = new URLSearchParams();
     if (params.category && params.category !== "All") query.set("category", params.category);
@@ -73,17 +71,14 @@ class ApiClient {
     return this.request<PlaceSummary[]>(`/places${qs ? `?${qs}` : ""}`);
   }
 
-  // Single place detail
   async getPlaceById(id: string): Promise<PlaceDetail> {
     return this.request<PlaceDetail>(`/places/${id}`);
   }
 
-  // Tour slots for place
   async getTourSlots(placeId: string): Promise<TourSlot[]> {
     return this.request<TourSlot[]>(`/places/${placeId}/tour-slots`);
   }
 
-  // Book seats on a tour slot
   async bookSeats(slotId: string, seats: number): Promise<{ booking: any; remainingSeats: number; isFullyBooked: boolean }> {
     return this.request<{ booking: any; remainingSeats: number; isFullyBooked: boolean }>(
       `/tour-slots/${slotId}/bookings`,
@@ -94,7 +89,6 @@ class ApiClient {
     );
   }
 
-  // Submit or update a review
   async submitReview(placeId: string, rating: number, body: string): Promise<Review> {
     return this.request<Review>(`/places/${placeId}/reviews`, {
       method: "POST",

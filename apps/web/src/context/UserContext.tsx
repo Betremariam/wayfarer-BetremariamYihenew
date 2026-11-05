@@ -15,7 +15,7 @@ const UserContext = createContext<UserContextType>({
   currentUser: null,
   users: [],
   isLoading: true,
-  switchUser: () => {},
+  switchUser: () => { },
 });
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
@@ -63,3 +63,4 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 export function useActiveUser() {
   return useContext(UserContext);
 }
+

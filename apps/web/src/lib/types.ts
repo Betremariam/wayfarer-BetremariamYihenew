@@ -52,3 +52,4 @@ export interface PlaceDetail extends PlaceSummary {
   reviews: Review[];
   tourSlots: TourSlot[];
 }
+

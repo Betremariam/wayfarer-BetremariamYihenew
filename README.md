@@ -31,9 +31,9 @@ Make sure you have the following installed:
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/Betremariam/rago_project.git
+git clone https://github.com/Betremariam/wayfarer-BetremariamYihenew.git
 
-cd rago_project
+cd wayfarer-BetremariamYihenew
 
 ```
 

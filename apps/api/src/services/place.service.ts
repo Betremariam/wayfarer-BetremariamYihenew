@@ -12,14 +12,9 @@ export interface GetPlacesFilter {
 export class PlaceService {
   constructor(private prisma: PrismaClient) {}
 
-  /**
-   * Fetch all places with backend filtering and sorting.
-   * Calculates honest Bayesian scores based on citywide review distribution.
-   */
   async getPlaces(filters: GetPlacesFilter = {}) {
     const { category, sort = SortOption.TOP_RATED, search } = filters;
 
-    // Build database where clause
     const whereClause: any = {};
 
     if (category && category !== "All" && category !== "all") {
@@ -37,7 +32,6 @@ export class PlaceService {
       ];
     }
 
-    // Retrieve places with their review aggregates
     const places = await this.prisma.place.findMany({
       where: whereClause,
       include: {
@@ -48,7 +42,6 @@ export class PlaceService {
       orderBy: { createdAt: "desc" },
     });
 
-    // Also get all reviews across ALL places in the system to calculate the true global mean C
     const globalReviewsAggregate = await this.prisma.review.aggregate({
       _avg: { rating: true },
       _count: { rating: true },
@@ -59,7 +52,6 @@ export class PlaceService {
         ? Number(globalReviewsAggregate._avg.rating.toFixed(2))
         : RankingService.FALLBACK_GLOBAL_C;
 
-    // Map each place with arithmetic average and review count
     const placesWithStats = places.map((place) => {
       const reviewCount = place.reviews.length;
       const ratingSum = place.reviews.reduce((sum, r) => sum + r.rating, 0);
@@ -75,14 +67,11 @@ export class PlaceService {
       };
     });
 
-    // Apply Bayesian ranking across the places
     const scoredPlaces = RankingService.rankPlaces(placesWithStats, globalC);
 
-    // Apply sorting logic
     let sortedPlaces = [...scoredPlaces];
 
     if (sort === SortOption.TOP_RATED) {
-      // Bayesian score descending (already sorted by RankingService.rankPlaces)
       sortedPlaces = scoredPlaces;
     } else if (sort === SortOption.MOST_REVIEWS) {
       sortedPlaces.sort((a, b) => b.reviewCount - a.reviewCount);
@@ -90,7 +79,6 @@ export class PlaceService {
       sortedPlaces.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     }
 
-    // Format output DTO
     return sortedPlaces.map((p) => ({
       id: p.id,
       name: p.name,
@@ -109,9 +97,6 @@ export class PlaceService {
     }));
   }
 
-  /**
-   * Get single place by ID with full details, reviews, and tour slots.
-   */
   async getPlaceById(id: string) {
     if (!id || typeof id !== "string") {
       throw new NotFoundError("Place ID is required");
@@ -143,7 +128,6 @@ export class PlaceService {
       throw new NotFoundError(`Place with ID '${id}' was not found`);
     }
 
-    // Compute global mean C for Bayesian score
     const globalReviewsAggregate = await this.prisma.review.aggregate({
       _avg: { rating: true },
       _count: { rating: true },

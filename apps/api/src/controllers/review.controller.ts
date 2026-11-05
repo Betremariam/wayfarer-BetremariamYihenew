@@ -25,7 +25,6 @@ export class ReviewController {
         body: validatedData.body,
       });
 
-      // 200 OK for upsert/update, 201 if created
       return res.status(200).json(review);
     } catch (error) {
       next(error);

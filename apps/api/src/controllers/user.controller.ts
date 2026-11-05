@@ -2,9 +2,6 @@ import { Request, Response, NextFunction } from "express";
 import { prisma } from "../db.js";
 
 export class UserController {
-  /**
-   * Returns the seeded demo actors for the "Acting as" user switcher in the frontend.
-   */
   static async getUsers(req: Request, res: Response, next: NextFunction) {
     try {
       const users = await prisma.user.findMany({

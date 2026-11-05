@@ -18,7 +18,6 @@ export function BayesianExplainerModal({ isOpen, onClose }: BayesianExplainerMod
         onClick={onClose}
       />
       <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden z-10 max-h-[90vh] flex flex-col">
-        {/* Header */}
         <div className="px-6 py-4 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/30">
@@ -41,9 +40,7 @@ export function BayesianExplainerModal({ isOpen, onClose }: BayesianExplainerMod
           </button>
         </div>
 
-        {/* Content */}
         <div className="p-6 overflow-y-auto space-y-5 text-slate-700 text-xs sm:text-sm">
-          {/* Why plain average fails */}
           <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200/80">
             <h4 className="font-bold text-amber-900 text-sm mb-1 flex items-center gap-1.5">
               <span>Why Simple Arithmetic Averages Are Unfair</span>
@@ -53,7 +50,6 @@ export function BayesianExplainerModal({ isOpen, onClose }: BayesianExplainerMod
             </p>
           </div>
 
-          {/* The Formula */}
           <div>
             <h4 className="font-bold text-slate-900 text-sm mb-2 flex items-center gap-2">
               <Calculator className="w-4 h-4 text-amber-600" />
@@ -80,7 +76,6 @@ export function BayesianExplainerModal({ isOpen, onClose }: BayesianExplainerMod
             </div>
           </div>
 
-          {/* Real comparison in our seed dataset */}
           <div className="border border-slate-200 rounded-2xl p-4 bg-slate-50/50">
             <h4 className="font-bold text-slate-900 text-xs uppercase tracking-wider mb-2">
               Real Demonstration From Addis Ababa Dataset
@@ -119,7 +114,6 @@ export function BayesianExplainerModal({ isOpen, onClose }: BayesianExplainerMod
           </div>
         </div>
 
-        {/* Footer */}
         <div className="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex justify-end">
           <button
             onClick={onClose}
@@ -132,3 +126,4 @@ export function BayesianExplainerModal({ isOpen, onClose }: BayesianExplainerMod
     </div>
   );
 }
+

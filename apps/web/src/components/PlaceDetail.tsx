@@ -83,7 +83,6 @@ export function PlaceDetail({
   return (
     <div className="h-full overflow-y-auto bg-slate-50/40">
       <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
-        {/* Destination Hero Image Card */}
         <div className="relative w-full h-72 sm:h-84 md:h-96 rounded-3xl overflow-hidden shadow-sm border border-slate-200 bg-slate-900">
           <img
             src={imageUrl}
@@ -92,7 +91,6 @@ export function PlaceDetail({
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent" />
 
-          {/* Floating Badges */}
           <div className="absolute top-4 left-4 flex items-center gap-2">
             <span
               className={`px-3 py-1 rounded-full text-xs font-bold shadow-md backdrop-blur-md ${badgeColor}`}
@@ -104,7 +102,6 @@ export function PlaceDetail({
             </span>
           </div>
 
-          {/* Bottom Title Overlay */}
           <div className="absolute bottom-4 left-4 right-4 text-white">
             <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight drop-shadow-sm">
               {name}
@@ -122,10 +119,8 @@ export function PlaceDetail({
           </div>
         </div>
 
-        {/* Honest Rating Breakdown Banner */}
         <div className="p-5 rounded-3xl bg-white border border-slate-200 shadow-xs">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
-            {/* Left: Star Rating and Raw Arithmetic Average */}
             <div className="flex items-center gap-4">
               <div className="text-3xl sm:text-4xl font-extrabold text-slate-900">
                 {ratingStats.averageRating.toFixed(1)}
@@ -138,7 +133,6 @@ export function PlaceDetail({
               </div>
             </div>
 
-            {/* Right: Honest Bayesian Score Badge */}
             <div className="flex items-center gap-3 bg-amber-50 border border-amber-200/80 px-4 py-2.5 rounded-2xl">
               <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-600 flex items-center justify-center shrink-0">
                 <ShieldCheck className="w-5 h-5" />
@@ -148,7 +142,7 @@ export function PlaceDetail({
                   <span>Honest Bayesian Score</span>
                   <button
                     onClick={onOpenBayesianInfo}
-                    className="p-0.5 hover:text-amber-700 text-amber-600 transition-colors"
+                    className="p-0.5 hover:text-amber-700 text-amber-600 transition-colors cursor-pointer"
                     title="How this score is calculated"
                   >
                     <Info className="w-3 h-3" />
@@ -162,7 +156,6 @@ export function PlaceDetail({
             </div>
           </div>
 
-          {/* Explanation Footer */}
           <div className="pt-3 text-[11px] text-slate-500 flex items-start gap-2">
             <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
             <span>
@@ -179,7 +172,6 @@ export function PlaceDetail({
           </div>
         </div>
 
-        {/* Place Description */}
         <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-xs space-y-2">
           <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
             About This Destination
@@ -189,7 +181,6 @@ export function PlaceDetail({
           </p>
         </div>
 
-        {/* Guided Tours Section */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
@@ -207,7 +198,6 @@ export function PlaceDetail({
           />
         </div>
 
-        {/* Reviews Section */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">

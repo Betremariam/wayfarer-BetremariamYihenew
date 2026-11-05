@@ -1,0 +1,25 @@
+{
+  "name": "wayfarer-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Wayfarer — Honest Ratings, Fair Bookings: Travel discovery and concurrency-safe guided-tour booking platform",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "setup": "npm run db:setup && npm run build",
+    "db:setup": "npm run --workspace=@wayfarer/api db:setup",
+    "db:migrate": "npm run --workspace=@wayfarer/api db:migrate",
+    "db:seed": "npm run --workspace=@wayfarer/api db:seed",
+    "build": "npm run --workspace=@wayfarer/shared build && npm run --workspace=@wayfarer/api build && npm run --workspace=@wayfarer/web build",
+    "dev": "concurrently -k -p \"[{name}]\" -n \"API,WEB\" -c \"cyan.bold,green.bold\" \"npm run --workspace=@wayfarer/api dev\" \"npm run --workspace=@wayfarer/web dev\"",
+    "dev:api": "npm run --workspace=@wayfarer/api dev",
+    "dev:web": "npm run --workspace=@wayfarer/web dev",
+    "test": "npm run --workspace=@wayfarer/api test",
+    "test:concurrency": "npm run --workspace=@wayfarer/api test:concurrency"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

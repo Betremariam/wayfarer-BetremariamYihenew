@@ -9,9 +9,9 @@
   ],
   "scripts": {
     "setup": "npm run db:setup && npm run build",
-    "db:setup": "npm run --workspace=@wayfarer/api db:setup",
-    "db:migrate": "npm run --workspace=@wayfarer/api db:migrate",
-    "db:seed": "npm run --workspace=@wayfarer/api db:seed",
+    "db:setup": "npm run db:migrate && npm run db:seed",
+    "db:migrate": "npx prisma db push --schema=prisma/schema.prisma",
+    "db:seed": "npx tsx prisma/seed.ts",
     "build": "npm run --workspace=@wayfarer/shared build && npm run --workspace=@wayfarer/api build && npm run --workspace=@wayfarer/web build",
     "dev": "concurrently -k -p \"[{name}]\" -n \"API,WEB\" -c \"cyan.bold,green.bold\" \"npm run --workspace=@wayfarer/api dev\" \"npm run --workspace=@wayfarer/web dev\"",
     "dev:api": "npm run --workspace=@wayfarer/api dev",

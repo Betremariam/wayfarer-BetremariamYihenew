@@ -28,9 +28,7 @@ export function PlaceList({
 }: PlaceListProps) {
   return (
     <div className="flex flex-col h-full bg-slate-50/60 border-r border-slate-200">
-      {/* Search & Sort Controls Header */}
       <div className="p-4 border-b border-slate-200 bg-white space-y-3 shrink-0">
-        {/* Search Bar */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
@@ -50,7 +48,6 @@ export function PlaceList({
           )}
         </div>
 
-        {/* Sort & Count Bar */}
         <div className="flex items-center justify-between gap-2 text-xs">
           <div className="text-slate-500 font-medium">
             {isLoading ? (
@@ -69,7 +66,7 @@ export function PlaceList({
               onChange={(e) => onSortChange(e.target.value)}
               className="text-xs font-semibold text-slate-700 bg-transparent border-none focus:outline-none cursor-pointer hover:text-slate-900"
             >
-              <option value="top-rated">Honest Ranking (Bayesian)</option>
+              <option value="top-rated">Honest Ranking</option>
               <option value="most-reviews">Most Reviews</option>
               <option value="newest">Recently Added</option>
             </select>
@@ -77,10 +74,8 @@ export function PlaceList({
         </div>
       </div>
 
-      {/* Places Scroll Area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {isLoading ? (
-          // Loading Skeletons
           Array.from({ length: 4 }).map((_, i) => (
             <div
               key={i}
@@ -95,7 +90,6 @@ export function PlaceList({
             </div>
           ))
         ) : places.length === 0 ? (
-          // Empty State
           <div className="text-center py-12 px-4">
             <div className="w-12 h-12 rounded-full bg-slate-100 mx-auto flex items-center justify-center text-slate-400 mb-3">
               <Compass className="w-6 h-6" />
@@ -106,7 +100,6 @@ export function PlaceList({
             </p>
           </div>
         ) : (
-          // Place Cards List
           places.map((place) => (
             <PlaceCard
               key={place.id}

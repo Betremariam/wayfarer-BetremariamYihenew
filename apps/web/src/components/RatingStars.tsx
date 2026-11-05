@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { Star } from "lucide-react";
 
 interface RatingStarsProps {
-  rating: number; // 0 to 5
+  rating: number;
   maxStars?: number;
   size?: "sm" | "md" | "lg";
   interactive?: boolean;

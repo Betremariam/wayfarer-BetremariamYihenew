@@ -33,7 +33,6 @@ export function PlaceCard({ place, isSelected, onSelect }: PlaceCardProps) {
       }`}
     >
       <div className="flex p-3 sm:p-3.5 gap-3.5 items-start">
-        {/* Thumbnail Image */}
         <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden shrink-0 bg-slate-100 border border-slate-100">
           <img
             src={imageUrl}
@@ -48,7 +47,6 @@ export function PlaceCard({ place, isSelected, onSelect }: PlaceCardProps) {
           </span>
         </div>
 
-        {/* Content */}
         <div className="flex-1 min-w-0 flex flex-col justify-between h-24 sm:h-28">
           <div>
             <h3
@@ -67,7 +65,6 @@ export function PlaceCard({ place, isSelected, onSelect }: PlaceCardProps) {
           </div>
 
           <div className="pt-1.5">
-            {/* Star Rating & Review Count */}
             <div className="flex items-center gap-2">
               <RatingStars rating={ratingStats.averageRating} size="sm" />
               <span className="text-xs font-semibold text-slate-800">
@@ -78,7 +75,6 @@ export function PlaceCard({ place, isSelected, onSelect }: PlaceCardProps) {
               </span>
             </div>
 
-            {/* Honest Score Pill & Hours */}
             <div className="flex items-center justify-between mt-2 pt-1 border-t border-slate-100 text-[11px]">
               <div
                 className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-bold text-[11px] bg-slate-100 text-slate-800 border border-slate-200"

@@ -15,16 +15,9 @@ export interface UpsertReviewInput {
 export class ReviewService {
   constructor(private prisma: PrismaClient) {}
 
-  /**
-   * Upsert a user review for a place.
-   * If the user already reviewed this place, the existing record is updated.
-   * Otherwise, a new review is created.
-   * Uses Prisma's upsert relying on the database unique constraint @@unique([placeId, userId]).
-   */
   async upsertReview(input: UpsertReviewInput) {
     const { placeId, userId, rating, body } = input;
 
-    // Validate inputs
     if (!placeId || typeof placeId !== "string" || placeId.trim() === "") {
       throw new ValidationError("Place ID is required");
     }
@@ -45,7 +38,6 @@ export class ReviewService {
       throw new ValidationError("Review body cannot exceed 1000 characters");
     }
 
-    // Verify user exists
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
     });
@@ -53,7 +45,6 @@ export class ReviewService {
       throw new UnauthorizedUserError(`User with ID '${userId}' does not exist.`);
     }
 
-    // Verify place exists
     const place = await this.prisma.place.findUnique({
       where: { id: placeId },
     });
@@ -61,7 +52,6 @@ export class ReviewService {
       throw new NotFoundError(`Place with ID '${placeId}' not found.`);
     }
 
-    // Upsert review
     const review = await this.prisma.review.upsert({
       where: {
         placeId_userId: {
@@ -98,9 +88,6 @@ export class ReviewService {
     };
   }
 
-  /**
-   * Get all reviews for a place.
-   */
   async getReviewsByPlace(placeId: string) {
     if (!placeId || typeof placeId !== "string") {
       throw new ValidationError("Place ID is required");

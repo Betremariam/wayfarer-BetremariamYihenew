@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-// Place Categories
 export const PlaceCategory = {
   ALL: "All",
   HISTORY: "History",
@@ -11,7 +10,6 @@ export const PlaceCategory = {
 
 export type PlaceCategoryType = (typeof PlaceCategory)[keyof typeof PlaceCategory];
 
-// Sort Options
 export const SortOption = {
   TOP_RATED: "top-rated",
   MOST_REVIEWS: "most-reviews",
@@ -20,14 +18,12 @@ export const SortOption = {
 
 export type SortOptionType = (typeof SortOption)[keyof typeof SortOption];
 
-// User Interface
 export interface UserDto {
   id: string;
   name: string;
   createdAt: string;
 }
 
-// Review Interface
 export interface ReviewDto {
   id: string;
   placeId: string;
@@ -42,7 +38,6 @@ export interface ReviewDto {
   };
 }
 
-// Tour Slot Interface
 export interface TourSlotDto {
   id: string;
   placeId: string;
@@ -54,7 +49,6 @@ export interface TourSlotDto {
   createdAt: string;
 }
 
-// Place Summary Interface
 export interface PlaceSummaryDto {
   id: string;
   name: string;
@@ -72,13 +66,11 @@ export interface PlaceSummaryDto {
   updatedAt: string;
 }
 
-// Place Detail Interface
 export interface PlaceDetailDto extends PlaceSummaryDto {
   reviews: ReviewDto[];
   tourSlots: TourSlotDto[];
 }
 
-// Booking Interface
 export interface BookingDto {
   id: string;
   slotId: string;
@@ -92,8 +84,6 @@ export interface BookingDto {
     capacity: number;
   };
 }
-
-// Zod Schemas for Validation
 
 export const PlacesQuerySchema = z.object({
   category: z.string().optional(),
@@ -128,15 +118,14 @@ export const CreateBookingSchema = z.object({
 
 export type CreateBookingInput = z.infer<typeof CreateBookingSchema>;
 
-// Bayesian Ranking Constants & Math
-export const BAYESIAN_M_DEFAULT = 10; // Minimum review confidence threshold
-export const BAYESIAN_DEFAULT_C = 3.5; // Prior mean when no global reviews exist
+export const BAYESIAN_M_DEFAULT = 10;
+export const BAYESIAN_DEFAULT_C = 3.5;
 
 export function calculateBayesianRating(
-  R: number, // place average rating
-  v: number, // place review count
-  C: number, // global average rating
-  m: number = BAYESIAN_M_DEFAULT // confidence threshold weight
+  R: number,
+  v: number,
+  C: number = BAYESIAN_DEFAULT_C,
+  m: number = BAYESIAN_M_DEFAULT
 ): number {
   if (v <= 0) {
     return Number(C.toFixed(2));

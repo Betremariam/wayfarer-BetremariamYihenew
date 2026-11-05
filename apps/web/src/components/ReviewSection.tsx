@@ -20,7 +20,6 @@ export function ReviewSection({
 }: ReviewSectionProps) {
   const { currentUser } = useActiveUser();
 
-  // Find if current user already submitted a review
   const existingUserReview = currentUser
     ? reviews.find((r) => r.userId === currentUser.id)
     : undefined;
@@ -31,7 +30,6 @@ export function ReviewSection({
   const [successNotice, setSuccessNotice] = useState<string | null>(null);
   const [errorNotice, setErrorNotice] = useState<string | null>(null);
 
-  // Sync form when currentUser or placeId changes
   useEffect(() => {
     if (existingUserReview) {
       setRating(existingUserReview.rating);
@@ -90,7 +88,6 @@ export function ReviewSection({
 
   return (
     <div className="space-y-6">
-      {/* Review Submission / Update Form */}
       <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs">
         <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
           <div className="flex items-center gap-2">
@@ -122,7 +119,6 @@ export function ReviewSection({
         )}
 
         <form onSubmit={handleSubmit} className="space-y-3.5">
-          {/* Star selector */}
           <div className="flex items-center gap-3">
             <label className="text-xs font-semibold text-slate-700">Your Rating:</label>
             <RatingStars
@@ -136,7 +132,6 @@ export function ReviewSection({
             </span>
           </div>
 
-          {/* Review body */}
           <div>
             <textarea
               rows={3}
@@ -152,7 +147,6 @@ export function ReviewSection({
             </div>
           </div>
 
-          {/* Status Notices */}
           {successNotice && (
             <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
@@ -189,7 +183,6 @@ export function ReviewSection({
         </form>
       </div>
 
-      {/* Existing Reviews List */}
       <div className="space-y-3">
         <h4 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
           <span>Community Reviews</span>
@@ -249,3 +242,4 @@ export function ReviewSection({
     </div>
   );
 }
+

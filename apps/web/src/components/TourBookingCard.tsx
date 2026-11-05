@@ -39,7 +39,6 @@ export function TourBookingCard({ slots, onBookingSuccess }: TourBookingCardProp
         slotId: slot.id,
         text: `Successfully reserved ${seatsToBook} seat(s)! Remaining seats: ${res.remainingSeats}`,
       });
-      // Call parent refresh to update places & tour slots
       onBookingSuccess();
     } catch (err: any) {
       setErrorMessage({
@@ -94,7 +93,6 @@ export function TourBookingCard({ slots, onBookingSuccess }: TourBookingCardProp
             }`}
           >
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              {/* Slot Date & Info */}
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0">
@@ -113,7 +111,6 @@ export function TourBookingCard({ slots, onBookingSuccess }: TourBookingCardProp
                   </div>
                 </div>
 
-                {/* Occupancy Progress Bar */}
                 <div className="mt-2 w-full max-w-xs">
                   <div className="flex items-center justify-between text-[11px] mb-1">
                     <span className="font-semibold text-slate-600">
@@ -142,7 +139,6 @@ export function TourBookingCard({ slots, onBookingSuccess }: TourBookingCardProp
                 </div>
               </div>
 
-              {/* Booking Controls */}
               <div className="flex items-center gap-2 sm:self-center shrink-0 pt-2 sm:pt-0">
                 {!isFull && (
                   <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2 py-1">
@@ -192,7 +188,6 @@ export function TourBookingCard({ slots, onBookingSuccess }: TourBookingCardProp
               </div>
             </div>
 
-            {/* Success Alert */}
             {successMessage && successMessage.slotId === slot.id && (
               <div className="mt-3 p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2 animate-in fade-in">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
@@ -200,7 +195,6 @@ export function TourBookingCard({ slots, onBookingSuccess }: TourBookingCardProp
               </div>
             )}
 
-            {/* Error Alert */}
             {errorMessage && errorMessage.slotId === slot.id && (
               <div className="mt-3 p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2 animate-in fade-in">
                 <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />

@@ -23,7 +23,6 @@ export default function Home() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isBayesianModalOpen, setIsBayesianModalOpen] = useState<boolean>(false);
 
-  // Load places list based on category, sort, and search filters
   const loadPlaces = useCallback(async () => {
     setIsPlacesLoading(true);
     setErrorMessage(null);
@@ -35,7 +34,6 @@ export default function Home() {
       });
       setPlaces(fetchedPlaces);
 
-      // Auto-select first place if none selected or if selected is no longer in list
       if (fetchedPlaces.length > 0) {
         if (!selectedPlaceId || !fetchedPlaces.some((p) => p.id === selectedPlaceId)) {
           setSelectedPlaceId(fetchedPlaces[0].id);
@@ -53,7 +51,6 @@ export default function Home() {
     }
   }, [selectedCategory, currentSort, searchQuery, selectedPlaceId]);
 
-  // Load selected place detail
   const loadPlaceDetail = useCallback(async (id: string) => {
     setIsDetailLoading(true);
     try {
@@ -66,19 +63,16 @@ export default function Home() {
     }
   }, []);
 
-  // Fetch places when category/sort/search change
   useEffect(() => {
     loadPlaces();
   }, [selectedCategory, currentSort, searchQuery]);
 
-  // Fetch place detail when selectedPlaceId changes
   useEffect(() => {
     if (selectedPlaceId) {
       loadPlaceDetail(selectedPlaceId);
     }
   }, [selectedPlaceId, loadPlaceDetail]);
 
-  // Handle booking or review updates: reload both detail and places list to keep ratings & seats synchronized
   const handleDataRefresh = useCallback(async () => {
     if (selectedPlaceId) {
       await loadPlaceDetail(selectedPlaceId);
@@ -97,14 +91,12 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-100/70">
-      {/* Top Header */}
       <Header
         selectedCategory={selectedCategory}
         onSelectCategory={(cat) => setSelectedCategory(cat)}
         onOpenBayesianInfo={() => setIsBayesianModalOpen(true)}
       />
 
-      {/* Backend Connection Error Banner */}
       {errorMessage && (
         <div className="bg-rose-50 border-b border-rose-200 px-4 py-2.5 text-xs text-rose-800 flex items-center justify-between">
           <div className="flex items-center gap-2 max-w-5xl mx-auto">
@@ -120,9 +112,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* Main Split Layout */}
       <main className="flex-1 flex flex-col lg:flex-row overflow-hidden max-w-7xl w-full mx-auto shadow-xs border-x border-slate-200/80 bg-white">
-        {/* Left Side: Destination List */}
         <section
           aria-label="Destinations List"
           className="w-full lg:w-[420px] xl:w-[460px] shrink-0 h-[480px] lg:h-[calc(100vh-4rem)] border-b lg:border-b-0"
@@ -139,7 +129,6 @@ export default function Home() {
           />
         </section>
 
-        {/* Right Side: Destination Details, Tour Booking & Reviews */}
         <section
           aria-label="Destination Details and Guided Tours"
           className="flex-1 h-[calc(100vh-4rem)] overflow-hidden"
@@ -153,7 +142,6 @@ export default function Home() {
         </section>
       </main>
 
-      {/* Bayesian Formula Explainer Modal */}
       <BayesianExplainerModal
         isOpen={isBayesianModalOpen}
         onClose={() => setIsBayesianModalOpen(false)}
@@ -161,3 +149,4 @@ export default function Home() {
     </div>
   );
 }
+

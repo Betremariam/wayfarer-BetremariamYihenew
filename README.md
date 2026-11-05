@@ -31,8 +31,10 @@ Make sure you have the following installed:
 ### 1. Clone the repository
 
 ```bash
-git clone <your-repository-url>
-cd wayfarer
+git clone https://github.com/Betremariam/rago_project.git
+
+cd rago_project
+
 ```
 
 ### 2. Install and configure

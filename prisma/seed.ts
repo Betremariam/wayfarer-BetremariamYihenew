@@ -2,7 +2,6 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-// Seeded Demo Users (Act-As Switcher)
 export const DEMO_USERS = [
   {
     id: "00000000-0000-0000-0000-000000000001",
@@ -21,7 +20,6 @@ export const DEMO_USERS = [
   },
 ];
 
-// Fixed Place IDs for deterministic relations
 export const PLACE_IDS = {
   NATIONAL_MUSEUM: "10000000-0000-0000-0000-000000000001",
   HOLY_TRINITY: "10000000-0000-0000-0000-000000000002",
@@ -35,7 +33,6 @@ export const PLACE_IDS = {
   BUNA_HERITAGE: "10000000-0000-0000-0000-000000000010",
 };
 
-// 10 Realistic Destinations in Addis Ababa, Ethiopia
 export const PLACES = [
   {
     id: PLACE_IDS.NATIONAL_MUSEUM,
@@ -162,8 +159,6 @@ async function main() {
     await prisma.user.create({ data: user });
   }
 
-  // Create community reviewer users for realistic review counts
-  // National Museum needs ~312 reviews, so create 350 community users
   console.log("==> Seeding community reviewer accounts...");
   const communityUsers: { id: string; name: string }[] = [];
   const firstNames = ["Abebe", "Marta", "Daniel", "Helen", "Tewodros", "Senait", "Yared", "Hiwot", "Kassahun", "Meron", "Solomon", "Selam", "Fikru", "Tigist", "Biruk", "Zewditu", "Michael", "Elena", "Lucas", "Amina"];
@@ -221,18 +216,11 @@ async function main() {
     "Good experience overall, quite crowded on weekends.",
   ];
 
-  // Helper to generate reviews with target count and target average rating
   const generateReviewsForPlace = (
     placeId: string,
     targetCount: number,
     targetAvg: number
   ) => {
-    // Determine how many 5-star, 4-star, 3-star reviews to yield targetAvg
-    // Example for targetAvg ~4.7: mostly 5s and 4s
-    // Calculate five-star and four-star counts to accurately achieve targetAvg
-    // For average between 4.0 and 5.0:
-    // targetAvg = (5 * f + 4 * (targetCount - f)) / targetCount = 4 + f / targetCount
-    // => f = Math.round((targetAvg - 4.0) * targetCount)
     const fiveStarCount = Math.min(targetCount, Math.max(0, Math.round((targetAvg - 4.0) * targetCount)));
     const fourStarCount = targetCount - fiveStarCount;
     const threeStarCount = 0;
@@ -273,38 +261,19 @@ async function main() {
     }
   };
 
-  // 1. National Museum: established museum with approximately 312 reviews and 4.70 average
   generateReviewsForPlace(PLACE_IDS.NATIONAL_MUSEUM, 312, 4.70);
-
-  // 2. Holy Trinity: ~120 reviews, ~4.80 avg
   generateReviewsForPlace(PLACE_IDS.HOLY_TRINITY, 120, 4.80);
-
-  // 3. Unity Park: ~180 reviews, ~4.75 avg
   generateReviewsForPlace(PLACE_IDS.UNITY_PARK, 180, 4.75);
-
-  // 4. Entoto Park: ~95 reviews, ~4.60 avg
   generateReviewsForPlace(PLACE_IDS.ENTOTO_PARK, 95, 4.60);
-
-  // 5. Red Terror Museum: ~88 reviews, ~4.85 avg
   generateReviewsForPlace(PLACE_IDS.RED_TERROR, 88, 4.85);
-
-  // 6. Ethnological Museum: ~75 reviews, ~4.60 avg
   generateReviewsForPlace(PLACE_IDS.ETHNOLOGICAL_MUSEUM, 75, 4.60);
-
-  // 7. Mount Entoto: ~60 reviews, ~4.50 avg
   generateReviewsForPlace(PLACE_IDS.MOUNT_ENTOTO, 60, 4.50);
-
-  // 8. Meskel Square: ~110 reviews, ~4.40 avg
   generateReviewsForPlace(PLACE_IDS.MESKEL_SQUARE, 110, 4.40);
-
-  // 9. Friendship Park: ~52 reviews, ~4.30 avg
   generateReviewsForPlace(PLACE_IDS.FRIENDSHIP_PARK, 52, 4.30);
 
-  // 10. Buna Heritage Coffee House: EXACTLY 1 review with a 5-star rating!
-  // Demonstrates Bayesian ranking pulling toward the mean!
   reviewsToInsert.push({
     placeId: PLACE_IDS.BUNA_HERITAGE,
-    userId: DEMO_USERS[0].id, // reviewed by Sara Tadesse
+    userId: DEMO_USERS[0].id,
     rating: 5,
     body: "An incredible authentic Ethiopian coffee ceremony! Watching the fresh green beans roasted over hot coals and brewed in the traditional jebena with fragrant rosemary and fresh ambasha was the best hospitality experience in Addis Ababa. Truly 5 stars!",
     createdAt: new Date(),
@@ -312,7 +281,6 @@ async function main() {
   });
 
   console.log(`==> Inserting ${reviewsToInsert.length} total reviews...`);
-  // Insert in chunks of 100 for efficiency
   for (let i = 0; i < reviewsToInsert.length; i += 100) {
     const chunk = reviewsToInsert.slice(i, i + 100);
     await prisma.review.createMany({
@@ -320,8 +288,6 @@ async function main() {
     });
   }
 
-  // Also seed some reviews by the demo users for realistic interactive state
-  // E.g., Dawit Kebede reviewed Holy Trinity
   await prisma.review.create({
     data: {
       placeId: PLACE_IDS.HOLY_TRINITY,
@@ -331,7 +297,6 @@ async function main() {
     },
   });
 
-  // Bethlehem Tilahun reviewed Entoto Park
   await prisma.review.create({
     data: {
       placeId: PLACE_IDS.ENTOTO_PARK,
@@ -354,8 +319,6 @@ async function main() {
   dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 2);
   dayAfterTomorrow.setHours(10, 0, 0, 0);
 
-  // 1. National Museum Tour Slots
-  // Slot A: Capacity 10, with 8 seats already booked (leaving exactly 2 seats remaining!)
   const museumSlotA = await prisma.tourSlot.create({
     data: {
       id: "20000000-0000-0000-0000-000000000001",
@@ -365,7 +328,6 @@ async function main() {
     },
   });
 
-  // Existing bookings for Slot A: 8 seats booked
   await prisma.booking.create({
     data: {
       slotId: museumSlotA.id,
@@ -380,9 +342,7 @@ async function main() {
       seats: 3,
     },
   });
-  // Total booked: 8 seats out of 10. Remaining: 2 seats!
 
-  // Slot B: Capacity 12, FULLY BOOKED (0 remaining seats)
   const museumSlotB = await prisma.tourSlot.create({
     data: {
       id: "20000000-0000-0000-0000-000000000002",
@@ -406,7 +366,6 @@ async function main() {
     },
   });
 
-  // Slot C: Capacity 15, 5 booked (10 remaining)
   await prisma.tourSlot.create({
     data: {
       id: "20000000-0000-0000-0000-000000000003",
@@ -424,7 +383,6 @@ async function main() {
     },
   });
 
-  // 2. Holy Trinity Cathedral Tour Slots
   await prisma.tourSlot.create({
     data: {
       id: "20000000-0000-0000-0000-000000000004",
@@ -442,7 +400,6 @@ async function main() {
     },
   });
 
-  // 3. Unity Park Tour Slots
   await prisma.tourSlot.create({
     data: {
       id: "20000000-0000-0000-0000-000000000005",
@@ -460,7 +417,6 @@ async function main() {
     },
   });
 
-  // 4. Entoto Park Guided Eco-Trek
   await prisma.tourSlot.create({
     data: {
       id: "20000000-0000-0000-0000-000000000006",
@@ -478,7 +434,6 @@ async function main() {
     },
   });
 
-  // 5. Buna Heritage Traditional Coffee Tasting Experience
   await prisma.tourSlot.create({
     data: {
       id: "20000000-0000-0000-0000-000000000007",

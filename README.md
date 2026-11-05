@@ -1,195 +1,49 @@
-# Wayfarer — Honest Ratings, Fair Bookings
+# 🧭 Wayfarer — Honest Ratings, Fair Bookings
 
-Wayfarer is a full-stack travel discovery and guided-tour booking platform built for Addis Ababa, Ethiopia. It addresses two critical software engineering challenges:
+**Discover places worth visiting. Book tours with confidence.**
 
-1. **Honest Place Ranking:** An **Empirical Bayesian Weighted Rating algorithm** that prevents low-sample-size anomalies (e.g., a newly opened café with a single 5-star review outranking an established museum with 312 reviews and a 4.70 average).
-2. **Guaranteed Prevention of Overbooking:** High-concurrency seat reservations backed by **PostgreSQL interactive transactions and row-level locking (`SELECT ... FOR UPDATE`)**, mathematically preventing overbooking under simultaneous requests.
+Wayfarer is a full-stack travel discovery and guided-tour booking application built around Addis Ababa, Ethiopia.
 
----
+It helps travellers discover interesting destinations, explore community reviews, and reserve guided tours without worrying about misleading ratings or overbooked experiences.
 
-## 🚀 Quick Start (Fresh Clone in 3 Commands)
+The idea behind Wayfarer is simple: **ratings should be trustworthy, and a confirmed booking should mean an available seat.**
 
-Wayfarer is configured so that a fresh clone can be fully setup and run with three commands:
+## ✨ What You Can Do
+
+- 🏛️ **Explore Places:** Discover destinations across Addis Ababa, organized into History, Nature, and Food categories.
+- ⭐ **Find the Best Places:** Browse destinations ranked using an Empirical Bayesian rating algorithm that considers both average ratings and review counts.
+- 📝 **Share Your Experience:** Leave a 1–5 star rating with a short review. Updating your review replaces your previous one.
+- 🎟️ **Book Guided Tours:** Browse available tour times, check remaining seats, and reserve your preferred experience.
+- 👤 **Switch Between Users:** Try the application using three demo profiles without creating an account.
+
+## 🚀 Getting Started
+
+Want to run Wayfarer locally? Follow these steps.
+
+### Prerequisites
+
+Make sure you have the following installed:
+
+- Node.js (npm included)
+- PostgreSQL 17
+- Git
+
+### 1. Clone the repository
 
 ```bash
-# 1. Install all monorepo dependencies
+git clone <your-repository-url>
+cd wayfarer
+```
+
+### 2. Install and configure
+
+Install the dependencies:
+
+```bash
 npm install
-
-# 2. Push database schema, seed realistic Addis Ababa destinations/reviews, and compile all packages
-npm run setup
-
-# 3. Start both Backend API (:5000) and Next.js Web Frontend (:3000) concurrently
-npm run dev
 ```
 
-- **Frontend:** [http://localhost:3000](http://localhost:3000)
-- **Backend API:** [http://localhost:5000/api](http://localhost:5000/api)
-- **API Health Check:** [http://localhost:5000/health](http://localhost:5000/health)
-
----
-
-## 🏛️ Technology Stack
-
-| Layer | Technologies |
-|---|---|
-| **Frontend** | Next.js 14 (App Router), React 18, TypeScript, Tailwind CSS, Lucide React, TanStack Query patterns |
-| **Backend** | Node.js, Express.js, TypeScript, REST API Architecture, Zod schema validation |
-| **ORM & Database** | Prisma ORM, PostgreSQL (with row-level locking & ACID transactions) |
-| **Testing** | Vitest, Supertest, Concurrency Integration Test Harness (20 simultaneous HTTP requests) |
-| **Monorepo** | npm Workspaces (`@wayfarer/web`, `@wayfarer/api`, `@wayfarer/shared`) |
-
----
-
-## 📐 Architecture Overview
-
-```
-wayfarer/
-├── apps/
-│   ├── web/               # Next.js 14 App Router desktop-first interface
-│   │   ├── src/app/       # Pages, layout, globals
-│   │   ├── src/components/# PlaceCard, TourBookingCard, ReviewSection, UserSwitcher, etc.
-│   │   ├── src/context/   # UserContext for "Acting As" demo persona switching
-│   │   └── src/lib/       # API client with X-User-Id injection
-│   └── api/               # Express REST API
-│       ├── src/controllers# Thin controllers delegating to services
-│       ├── src/services/  # RankingService, BookingService, ReviewService, PlaceService
-│       ├── src/middlewares# Centralized error handler & Zod validation
-│       └── src/tests/     # Vitest & Supertest suites (concurrency, ranking, reviews, places)
-├── packages/
-│   └── shared/            # Shared TypeScript interfaces, DTOs, and Zod schemas
-├── prisma/
-│   ├── schema.prisma      # Relational PostgreSQL models with constraints & indexes
-│   └── seed.ts            # Deterministic Addis Ababa seed dataset (1,093 reviews)
-├── DECISIONS.md           # Deep-dive justification of Bayesian ranking & row locking
-├── AI_USAGE.md            # Transparent disclosure of AI tooling and verification
-├── .env.example           # Environment template with safe default configuration
-└── package.json           # Root workspace configuration
-```
-
----
-
-## 🧮 1. Honest Ranking Algorithm (Bayesian Weighted Score)
-
-Discovery platforms using standard arithmetic mean ($\sum r_i / n$) suffer from severe cold-start distortions: a place with one 5-star review receives `5.00` and tops the search results ahead of a world-famous museum with 312 reviews and a `4.70` average.
-
-Wayfarer implements an **Empirical Bayesian Weighted Rating** formula:
-
-$$\text{Weighted Rating} = \left(\frac{v}{v + m}\right) \times R + \left(\frac{m}{v + m}\right) \times C$$
-
-Where:
-- **$R$:** Observed average rating of the destination.
-- **$v$:** Total number of reviews for the destination.
-- **$m = 10$:** Minimum review confidence threshold.
-- **$C \approx 4.65$:** Dynamically computed global mean across all reviews in the system.
-
-### Verified Behavior:
-| Destination | Reviews ($v$) | Raw Average ($R$) | Bayesian Score | Rank |
-|---|---|---|---|---|
-| **National Museum of Ethiopia** | **312** | **4.70** | **4.70** | **#1** |
-| **Buna Heritage Coffee House** | **1** | **5.00** | **4.68** | **#2 (Pulled to mean)** |
-
-*For complete mathematical proofs and parameter justification, see [DECISIONS.md](DECISIONS.md).*
-
----
-
-## 🔒 2. Tour Booking Concurrency Protection (Zero Overbooking)
-
-Wayfarer guarantees that no tour slot can ever exceed its capacity, even under intense concurrent traffic.
-
-### Transaction Serialization Pattern:
-1. Begins an ACID database transaction.
-2. Acquires an **exclusive PostgreSQL row lock** on the tour slot row using parameterized raw SQL:
-   ```sql
-   SELECT id, capacity, "placeId", "startsAt"
-   FROM "tour_slots"
-   WHERE id = $1
-   FOR UPDATE;
-   ```
-3. Calculates current booked seats while holding the lock.
-4. Validates requested seat count against remaining capacity.
-5. If seats are available, inserts the booking and commits.
-6. If the slot is full, aborts and rolls back, returning a friendly `409 Conflict` response without exposing raw database errors.
-
-### Parallel Integration Concurrency Test:
-An automated test in `apps/api/src/tests/concurrency.test.ts`:
-1. Creates a tour slot with capacity `10`.
-2. Seeds initial bookings totaling `8` seats (leaving `2` remaining).
-3. Fires `20` concurrent HTTP booking requests simultaneously (`Promise.all`).
-4. **Result:** Exactly `2` requests succeed (`201 Created`), `18` requests are rejected (`409 Conflict`), and final booked seats in PostgreSQL equals exactly `10`.
-
----
-
-## 👥 3. "Acting-As" User Persona Switcher
-
-No passwords or authentication are required:
-- Exactly three demo personas are seeded:
-  - **Sara Tadesse**
-  - **Dawit Kebede**
-  - **Bethlehem Tilahun**
-- The top header provides an interactive switcher that updates frontend state and persists the active user in `localStorage`.
-- All API requests attach the selected user's ID via the `X-User-Id` header.
-- The backend validates the user ID against the database (rejecting forged or non-existent IDs).
-- Reviews and tour reservations are recorded under the active persona.
-- If a user previously reviewed a place, submitting another review automatically updates their existing review rather than duplicating it (enforced by `@@unique([placeId, userId])`).
-
----
-
-## 🏙️ Demonstration Dataset (Addis Ababa, Ethiopia)
-
-The database seed command generates 10 realistic destinations:
-1. **National Museum of Ethiopia** (History — Home of Lucy / Dinkinesh, 312 reviews, 4.70 avg)
-2. **Holy Trinity Cathedral** (History — Imperial tombs and stained glass, 120 reviews, 4.80 avg)
-3. **Unity Park** (History — Grand Palace compound and botanical gardens, 180 reviews, 4.75 avg)
-4. **Entoto Park** (Nature — High-altitude eucalyptus eco-park, 95 reviews, 4.60 avg)
-5. **Red Terror Martyrs Memorial Museum** (History — Memorial at Meskel Square, 88 reviews, 4.85 avg)
-6. **Ethnological Museum** (History — Haile Selassie's former palace, 75 reviews, 4.60 avg)
-7. **Mount Entoto** (Nature — 3,200m peak with panoramic vistas, 60 reviews, 4.50 avg)
-8. **Meskel Square** (History — Historic public amphitheater, 110 reviews, 4.40 avg)
-9. **Friendship Park** (Nature — Musical fountains and urban gardens, 52 reviews, 4.30 avg)
-10. **Buna Heritage Coffee House** (Food — Traditional jebena ceremony café, exactly 1 review, 5.00 avg)
-
----
-
-## 🧪 Automated Testing
-
-All tests run via a single command from the monorepo root:
-
-```bash
-npm test
-```
-
-### Test Suites (23 Total Tests):
-- **Ranking Tests (`ranking.test.ts`):** Verifies Bayesian formula, 1-review cafe vs 312-review museum, asymptotic convergence, and zero-review non-NaN guards.
-- **Places API Tests (`places.test.ts`):** Verifies backend category filtering (`category=History`), top-rated Bayesian sorting, and place detail retrieval.
-- **Review Tests (`reviews.test.ts`):** Verifies review creation, review updates for existing users, `@@unique([placeId, userId])` constraint enforcement, and input validations.
-- **Concurrency Tests (`concurrency.test.ts`):** Executes 20 simultaneous HTTP requests against PostgreSQL, verifying zero overbooking and friendly rejection responses.
-
-Run dedicated concurrency test:
-```bash
-npm run test:concurrency
-```
-
----
-
-## 📡 API Endpoint Summary
-
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/health` | API service health check |
-| `GET` | `/api/users` | List demo actors for user switcher |
-| `GET` | `/api/places` | Filter by `category`, sort by `top-rated`, `most-reviews`, `newest` |
-| `GET` | `/api/places/:id` | Place details with tour slots, reviews, and rating stats |
-| `GET` | `/api/places/:id/tour-slots` | Tour slots for a place with live remaining seats |
-| `POST` | `/api/tour-slots/:id/bookings` | Concurrency-safe seat reservation (`X-User-Id` header required) |
-| `GET` | `/api/places/:id/reviews` | Reviews for a destination |
-| `POST` | `/api/places/:id/reviews` | Upsert review (`X-User-Id` header required) |
-| `PUT` | `/api/places/:id/reviews` | Update review (`X-User-Id` header required) |
-
----
-
-## ⚙️ Environment Configuration
-
-Copy `.env.example` to `.env`:
+Copy `.env.example` to `.env` and configure your PostgreSQL connection:
 
 ```env
 DATABASE_URL="postgresql://postgres:1234@localhost:5432/wayfarer?schema=public"
@@ -199,10 +53,262 @@ NODE_ENV=development
 NEXT_PUBLIC_API_URL="http://localhost:5000/api"
 ```
 
+Make sure the PostgreSQL databases exist before proceeding.
+
+### 3. Set up and run
+
+Prepare the database, generate the seed data, and build the packages:
+
+```bash
+npm run setup
+```
+
+Start the application:
+
+```bash
+npm run dev
+```
+
+That's it! You're ready to explore Wayfarer.
+
+| Service | Address |
+|---|---|
+| Web application | http://localhost:3000 |
+| Backend API | http://localhost:5000/api |
+| API health check | http://localhost:5000/health |
+
 ---
 
-## ⚠️ Known Limitations & Future Work
-- **High-Contention Locks:** For extreme ticket drops (>5,000 requests/sec), an in-memory Redis atomic counter (`DECRBY`) can reserve seats ahead of database serialization.
-- **Idempotency Keys:** Adding an `Idempotency-Key` header prevents duplicate client-side double clicks.
-- **Materialized Views:** For datasets exceeding 100,000 destinations, caching the global prior $C$ or computing Bayesian scores asynchronously via background workers will optimize read throughput.
+## 🖥️ Application Overview
 
+### Discover destinations
+
+Explore Addis Ababa through a collection of destinations. Filter by category or sort places by their weighted ratings.
+
+### Explore a destination
+
+View detailed information, ratings, community reviews, and available guided tours.
+
+### Book a guided tour
+
+Check the remaining seats for each tour slot and reserve your preferred time. Fully booked slots are clearly indicated.
+
+### Share your experience
+
+Rate destinations and leave short reviews. Each user has one review per destination, which can be updated whenever their experience changes.
+
+### Switch between demo users
+
+Use the user switcher to explore the application as Sara Tadesse, Dawit Kebede, or Bethlehem Tilahun.
+
+---
+
+## 🏗️ Technology Stack
+
+Wayfarer uses a TypeScript-based monorepo architecture.
+
+| Layer | Technologies |
+|---|---|
+| Frontend | Next.js 14, React 18, TypeScript, Tailwind CSS |
+| Backend | Node.js, Express.js, TypeScript |
+| Database | PostgreSQL 17, Prisma ORM |
+| Validation | Zod |
+| Testing | Vitest, Supertest |
+| Monorepo | npm Workspaces |
+
+## 📁 Project Structure
+
+```text
+wayfarer/
+├── apps/
+│   ├── web/                 # Next.js frontend
+│   │   └── src/
+│   │       ├── app/         # Pages and layouts
+│   │       ├── components/  # Reusable UI components
+│   │       ├── context/     # User context
+│   │       └── lib/         # API client
+│   │
+│   └── api/                 # Express backend
+│       └── src/
+│           ├── controllers/ # HTTP request handlers
+│           ├── services/    # Business logic
+│           ├── middlewares/ # Validation and error handling
+│           └── tests/       # Automated tests
+│
+├── packages/
+│   └── shared/              # Shared types and schemas
+│
+├── prisma/
+│   ├── schema.prisma        # Database schema
+│   └── seed.ts              # Seed data
+│
+├── DECISIONS.md              # Architecture and engineering decisions
+├── AI_USAGE.md               # AI assistance and verification log
+├── .env.example              # Environment configuration template
+├── package.json
+└── README.md
+```
+
+---
+
+## 🧠 Engineering Highlights
+
+Wayfarer was designed around two important engineering challenges.
+
+### 1. Fairer Ratings with Bayesian Ranking
+
+A simple average can make a destination with one 5-star review rank above a popular destination with hundreds of positive reviews.
+
+Wayfarer addresses this using an Empirical Bayesian Weighted Rating:
+
+\[
+WR = \frac{v}{v+m}R + \frac{m}{v+m}C
+\]
+
+Where:
+
+- `R` — Average rating of the destination.
+- `v` — Number of reviews.
+- `m` — Confidence threshold (10).
+- `C` — Global average rating across the catalog.
+
+This balances a destination's own rating against the overall rating distribution.
+
+**Example:**
+
+| Destination | Reviews | Average | Weighted Rating |
+|---|---:|---:|---:|
+| National Museum of Ethiopia | 312 | 4.70 | 4.70 |
+| Buna Heritage Coffee House | 1 | 5.00 | 4.68 |
+
+A single positive review does not automatically make a new destination the highest-ranked place.
+
+For the mathematical explanation and design rationale, see [DECISIONS.md](DECISIONS.md).
+
+### 2. Reliable Bookings Without Overbooking
+
+What happens when 20 people try to book the last two seats simultaneously?
+
+A simple availability check is not enough. Multiple requests could read the same remaining capacity and all attempt to reserve it.
+
+Wayfarer uses PostgreSQL transactions and row-level locking through `SELECT ... FOR UPDATE`.
+
+The booking process:
+
+1. Starts a database transaction.
+2. Locks the requested tour slot.
+3. Calculates the currently booked seats.
+4. Checks the remaining capacity.
+5. Creates the booking if enough seats are available.
+6. Commits the transaction or rolls it back if the request cannot be fulfilled.
+
+This ensures that concurrent booking requests for the same slot cannot exceed its capacity.
+
+---
+
+## 🏙️ Explore Addis Ababa
+
+The application includes 10 seeded destinations across three categories.
+
+| Destination | Category |
+|---|---|
+| National Museum of Ethiopia | History |
+| Holy Trinity Cathedral | History |
+| Unity Park | History |
+| Entoto Park | Nature |
+| Red Terror Martyrs Memorial Museum | History |
+| Ethnological Museum | History |
+| Mount Entoto | Nature |
+| Meskel Square | History |
+| Friendship Park | Nature |
+| Buna Heritage Coffee House | Food |
+
+The seed dataset includes demo users, reviews, and tour information to make the application ready to explore.
+
+---
+
+## 🧪 Running Tests
+
+Testing focuses on the application's most important business rules.
+
+Run the complete test suite:
+
+```bash
+npm test
+```
+
+The project currently includes 23 automated tests covering:
+
+| Test Suite | What It Covers |
+|---|---|
+| Ranking | Bayesian calculations, review counts, and edge cases |
+| Places | Category filtering, sorting, and place details |
+| Reviews | Review creation, updates, and uniqueness |
+| Bookings | Concurrent reservations and capacity protection |
+
+To run the dedicated booking concurrency test:
+
+```bash
+npm run test:concurrency
+```
+
+The concurrency scenario starts with a tour slot containing 8 booked seats out of 10, then sends 20 simultaneous booking requests.
+
+Expected result:
+
+- 2 successful bookings.
+- 18 rejected requests.
+- 10 total booked seats.
+- No overbooking.
+
+The integration tests use PostgreSQL rather than relying solely on mocked database behavior.
+
+---
+
+## 📡 API Overview
+
+The backend exposes the following REST endpoints:
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/health` | Check API status |
+| GET | `/api/users` | Retrieve demo users |
+| GET | `/api/places` | List, filter, and sort places |
+| GET | `/api/places/:id` | Get place details |
+| GET | `/api/places/:id/tour-slots` | Get tour availability |
+| POST | `/api/tour-slots/:id/bookings` | Reserve tour seats |
+| GET | `/api/places/:id/reviews` | Retrieve place reviews |
+| POST | `/api/places/:id/reviews` | Create or update a review |
+| PUT | `/api/places/:id/reviews` | Update an existing review |
+
+Booking and review requests require the `X-User-Id` header to identify the active demo user.
+
+---
+
+## 🔮 Future Improvements
+
+Some areas I'd like to explore beyond the current implementation:
+
+- **Booking Idempotency:** Prevent duplicate reservations caused by repeated requests or double-clicks.
+- **Improved Scalability:** Introduce caching for frequently accessed ranking data.
+- **Reservation Queues:** Explore queue-based booking workflows for high-demand tour slots.
+- **Mobile Experience:** Extend the desktop-first interface into a fully responsive mobile experience.
+
+---
+
+## 📚 Additional Documentation
+
+Interested in the implementation details?
+
+- [Architecture & Engineering Decisions](DECISIONS.md) — Ranking mathematics, transaction design, and engineering trade-offs.
+- [AI Usage & Development Contributions](AI_USAGE.md) — AI assistance, development contributions, and verification process.
+
+---
+
+## 👨‍💻 About This Project
+
+Wayfarer was developed as part of the **Rago Software Solutions Intern Full-Stack Engineer Take-Home Assessment**.
+
+The project focuses on building practical software solutions to real-world problems while maintaining clear architecture, reliable database operations, and testable business logic.
+
+**Built with care in Addis Ababa, Ethiopia. 🇪🇹**

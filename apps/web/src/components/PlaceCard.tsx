@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { PlaceSummary } from "../lib/types";
 import { RatingStars } from "./RatingStars";
 import { Clock, ShieldCheck, MapPin } from "lucide-react";
@@ -13,6 +13,13 @@ interface PlaceCardProps {
 
 export function PlaceCard({ place, isSelected, onSelect }: PlaceCardProps) {
   const { name, category, openingHours, address, imageUrl, ratingStats } = place;
+  const [imgSrc, setImgSrc] = useState(imageUrl);
+  const [hasError, setHasError] = useState(false);
+
+  useEffect(() => {
+    setImgSrc(imageUrl);
+    setHasError(false);
+  }, [imageUrl]);
 
   const categoryColors: Record<string, string> = {
     History: "bg-blue-50 text-blue-700 border-blue-200",
@@ -35,8 +42,14 @@ export function PlaceCard({ place, isSelected, onSelect }: PlaceCardProps) {
       <div className="flex p-3 sm:p-3.5 gap-3.5 items-start">
         <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden shrink-0 bg-slate-100 border border-slate-100">
           <img
-            src={imageUrl}
+            src={imgSrc}
             alt={name}
+            onError={() => {
+              if (!hasError) {
+                setHasError(true);
+                setImgSrc("https://images.unsplash.com/photo-1543783207-ec64e4d95325?auto=format&fit=crop&w=1200&q=80");
+              }
+            }}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             loading="lazy"
           />

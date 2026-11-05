@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { PlaceDetail as PlaceDetailType } from "../lib/types";
 import { RatingStars } from "./RatingStars";
 import { TourBookingCard } from "./TourBookingCard";
@@ -71,6 +71,14 @@ export function PlaceDetail({
     tourSlots,
   } = place;
 
+  const [imgSrc, setImgSrc] = useState(imageUrl);
+  const [hasError, setHasError] = useState(false);
+
+  useEffect(() => {
+    setImgSrc(imageUrl);
+    setHasError(false);
+  }, [imageUrl]);
+
   const categoryColors: Record<string, string> = {
     History: "bg-blue-600/90 text-white",
     Nature: "bg-emerald-600/90 text-white",
@@ -85,8 +93,14 @@ export function PlaceDetail({
       <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
         <div className="relative w-full h-72 sm:h-84 md:h-96 rounded-3xl overflow-hidden shadow-sm border border-slate-200 bg-slate-900">
           <img
-            src={imageUrl}
+            src={imgSrc}
             alt={name}
+            onError={() => {
+              if (!hasError) {
+                setHasError(true);
+                setImgSrc("https://images.unsplash.com/photo-1543783207-ec64e4d95325?auto=format&fit=crop&w=1200&q=80");
+              }
+            }}
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent" />

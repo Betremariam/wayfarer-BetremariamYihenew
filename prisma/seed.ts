@@ -54,7 +54,7 @@ export const PLACES = [
     openingHours: "8:00 AM - 6:00 PM (Daily)",
     address: "Arat Kilo, Addis Ababa",
     imageUrl:
-      "https://images.unsplash.com/photo-1548625361-195fe61a55c3?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1543783207-ec64e4d95325?auto=format&fit=crop&w=1200&q=80",
   },
   {
     id: PLACE_IDS.ENTOTO_PARK,

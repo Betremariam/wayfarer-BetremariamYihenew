@@ -1,0 +1,87 @@
+// Wayfarer Prisma Relational Database Schema
+// Database: PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(uuid())
+  name      String
+  isActor   Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  reviews   Review[]
+  bookings  Booking[]
+
+  @@map("users")
+}
+
+model Place {
+  id           String     @id @default(uuid())
+  name         String
+  category     String
+  description  String     @db.Text
+  openingHours String
+  address      String
+  imageUrl     String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  reviews      Review[]
+  tourSlots    TourSlot[]
+
+  @@index([category])
+  @@map("places")
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  placeId   String
+  userId    String
+  rating    Int      // 1 to 5
+  body      String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  place Place @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Enforces at database-level that each user can only have one review per place
+  @@unique([placeId, userId])
+  @@index([placeId])
+  @@index([userId])
+  @@map("reviews")
+}
+
+model TourSlot {
+  id        String    @id @default(uuid())
+  placeId   String
+  startsAt  DateTime
+  capacity  Int
+  createdAt DateTime  @default(now())
+
+  place    Place     @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  bookings Booking[]
+
+  @@index([placeId])
+  @@map("tour_slots")
+}
+
+model Booking {
+  id        String   @id @default(uuid())
+  slotId    String
+  userId    String
+  seats     Int
+  createdAt DateTime @default(now())
+
+  slot TourSlot @relation(fields: [slotId], references: [id], onDelete: Cascade)
+  user User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([slotId])
+  @@index([userId])
+  @@map("bookings")
+}
